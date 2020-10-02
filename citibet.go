@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"math/rand"
+	"log"
 )
 
 var		(
@@ -54,24 +55,39 @@ func	(c *Client)Request(url string, v interface{}) error {
 
 // params are included in the url
 
+	if c.config.Info	{
+		log.Println("(Request) Url: ",url)
+	}
 
 	
 	resp, err := c.HttpClient.Get(url)
 
 	if err != nil {
+		if c.config.Info	{
+			log.Println("(Request) Get failed: ",err," URL: ",url)
+		}
 		return err
 	}
 
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		if c.config.Info	{
+			log.Println("(Request) ReadAll failed: ",err," URL: ",url)
+		}
 		return err
 	}
 
 	if resp.StatusCode != 200 {
+		if c.config.Info	{
+			log.Println("(Request) StatusCode not 200: ",resp.StatusCode," Status: ",resp.Status)
+		}
 		return errors.New(resp.Status)
 	} else {
 		if err := json.Unmarshal(data, v); err != nil {
+		if c.config.Info	{
+			log.Println("(Request) Unmarshal failed: ",err," raw data: ",data)
+		}
 			return err
 		}
 	}
