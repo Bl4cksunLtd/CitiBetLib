@@ -23,7 +23,7 @@ func	(c 	*Client)Login()	(ResponseStatus,error)	{
 		log.Printf("(Login) Url:%s\n",url)
 	}
 	if c.config.Debug	{
-		return	ResponseStatus{1,0},nil
+		return	ResponseStatus{1,"0000"},nil
 	}	
 	
 	rs:=ResponseStatus{}
