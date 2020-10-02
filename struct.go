@@ -29,7 +29,7 @@ type	Client	struct	{
 }
 
 type	Card	struct	{
-	CardId		int
+	CardId		int				`json:",string"`
 	RaceDate	string
 	Country		string
 	Venue		string
@@ -42,9 +42,9 @@ type	CardListResponse	struct	{
 }
 
 type	Event	struct	{
-	RaceStatus		int
+	RaceStatus		int			`json:",string"`
 	RaceTime		string
-	Race			int
+	Race			int			`json:",string"`
 }
 
 type	EventListResponse	struct	{
@@ -52,11 +52,11 @@ type	EventListResponse	struct	{
 }
 
 type	Runner	struct	{
-	No				int
+	No				int			`json:",string"`
 	JockeyName		string
 	TrainerName		string
 	HsName			string
-	Draw			int
+	Draw			int			`json:",string"`
 	Wgt				float64
 }
 
