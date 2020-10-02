@@ -14,7 +14,7 @@ import (
 )
 
 func	(c 	*Client)Login()	(ResponseStatus,error)	{
-	url:=fmt.Sprintf("%sapi/service/login?api=%s&uid=%s&x=.16f",
+	url:=fmt.Sprintf("%sapi/service/login?api=%s&uid=%s&x=%.16f",
 					c.config.Url,
 					c.config.ApiKey,
 					c.config.UserName,
