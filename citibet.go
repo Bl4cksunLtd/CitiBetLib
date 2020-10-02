@@ -79,7 +79,7 @@ func	(c *Client)Request(url string, v interface{}) error {
 		}
 		return err
 	}
-	c.rx.ReplaceAll(data, []byte("$1"))
+	data=c.rx.ReplaceAll(data, []byte("$1"))
 	if resp.StatusCode != 200 {
 		if c.config.Info	{
 			log.Println("(Request) StatusCode not 200: ",resp.StatusCode," Status: ",resp.Status)
