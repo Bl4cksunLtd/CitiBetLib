@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"errors"
 	"io/ioutil"
-	"encoding/json"
+//	"encoding/json"
+	"github.com/pquerna/ffjson/ffjson"
 	"math/rand"
 	"log"
 )
@@ -84,7 +85,7 @@ func	(c *Client)Request(url string, v interface{}) error {
 		}
 		return errors.New(resp.Status)
 	} else {
-		if err := json.Unmarshal(data, v); err != nil {
+		if err := ffjson.Unmarshal(data, v); err != nil {
 		if c.config.Info	{
 			log.Println("(Request) Unmarshal failed: ",err," raw data: ",data)
 		}

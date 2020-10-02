@@ -79,5 +79,5 @@ type 	Pending		struct	{
 
 type	ResponseStatus	struct	{
 	Status			int
-	Code			string
+	Code			int
 }
