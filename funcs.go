@@ -18,7 +18,7 @@ func	(c 	*Client)Login()	(ResponseStatus,error)	{
 					c.config.Url,
 					c.config.ApiKey,
 					c.config.UserName,
-					rand.Float64)
+					rand.Float64())
 	if c.config.Info	{
 		log.Printf("(Login) Url:%s\n",url)
 	}
