@@ -64,7 +64,7 @@ type	RunnerListResponse	struct	{
 
 type 	LoginResponse	struct	{
 	Status 			int
-	Code			string
+	Code			int
 }
 
 type 	Pending		struct	{
