@@ -5,9 +5,10 @@ import (
 	"net"
 	"net/http"
 	"errors"
+	"regexp"
 	"io/ioutil"
-//	"encoding/json"
-	"github.com/pquerna/ffjson/ffjson"
+	"encoding/json"
+//	"github.com/pquerna/ffjson/ffjson"
 	"math/rand"
 	"log"
 )
@@ -48,7 +49,7 @@ func	NewClient(config	*Config)	(*Client,error)	{
 		Timeout: 	2*time.Second,
 		Transport:	netTransport,
 	}
-	
+	c.rx=regexp.MustCompile(`\b0*(\d+)`)
 	return c,nil
 }
 
@@ -78,14 +79,14 @@ func	(c *Client)Request(url string, v interface{}) error {
 		}
 		return err
 	}
-
+	c.rx.ReplaceAll(data, []byte("$1"))
 	if resp.StatusCode != 200 {
 		if c.config.Info	{
 			log.Println("(Request) StatusCode not 200: ",resp.StatusCode," Status: ",resp.Status)
 		}
 		return errors.New(resp.Status)
 	} else {
-		if err := ffjson.Unmarshal(data, v); err != nil {
+		if err := json.Unmarshal(data, v); err != nil {
 		if c.config.Info	{
 			log.Println("(Request) Unmarshal failed: ",err," raw data: ",data)
 		}

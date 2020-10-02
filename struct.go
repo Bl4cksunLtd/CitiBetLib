@@ -4,6 +4,7 @@ import (
 //	"time"
 	"net/http"
 	"sync"
+	"regexp"
 )
 
 const	(
@@ -24,6 +25,7 @@ type	Client	struct	{
 	config		*Config
 	once		sync.Once
 	HttpClient	*http.Client
+	rx			*regexp.Regexp 	// 	used to hold regex expression to fix crap JSON messages
 }
 
 type	Card	struct	{
