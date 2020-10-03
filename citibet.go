@@ -49,7 +49,8 @@ func	NewClient(config	*Config)	(*Client,error)	{
 		Timeout: 	2*time.Second,
 		Transport:	netTransport,
 	}
-	c.rx=regexp.MustCompile(`\b0*(\d+)`)
+//	c.rx=regexp.MustCompile(`\b0*(\d+)`)
+	c.rx=regexp.MustCompile(`(?<!")\b0*(\d+)`)
 	return c,nil
 }
 
