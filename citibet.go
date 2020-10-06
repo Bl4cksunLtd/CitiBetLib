@@ -5,10 +5,9 @@ import (
 	"net"
 	"net/http"
 	"errors"
-	"regexp"
 	"io/ioutil"
 	"encoding/json"
-//	"github.com/pquerna/ffjson/ffjson"
+	"bytes"
 	"math/rand"
 	"log"
 )
@@ -49,8 +48,6 @@ func	NewClient(config	*Config)	(*Client,error)	{
 		Timeout: 	2*time.Second,
 		Transport:	netTransport,
 	}
-//	c.rx=regexp.MustCompile(`\b0*(\d+)`)
-	c.rx=regexp.MustCompile(`(?<!")\b0*(\d+)`)
 	return c,nil
 }
 
@@ -80,7 +77,7 @@ func	(c *Client)Request(url string, v interface{}) error {
 		}
 		return err
 	}
-	data=c.rx.ReplaceAll(data, []byte("$1"))
+	FixJSON(data,len(data))
 	if resp.StatusCode != 200 {
 		if c.config.Info	{
 			log.Println("(Request) StatusCode not 200: ",resp.StatusCode," Status: ",resp.Status)
@@ -96,4 +93,35 @@ func	(c *Client)Request(url string, v interface{}) error {
 	}
 
 	return nil
+}
+
+
+func	FixJSON(bad	[]byte,ln int)	{
+//	log.Println("(FixJSON) Before: ",bad)
+	
+	var	quote		bool
+	var	m				int
+	for n:=0;n<ln;n++	{
+		if bad[n]=='"'	{
+			quote=!quote
+			bad[m]=bad[n]
+			m++
+			continue
+		}
+		if	quote	{
+			bad[m]=bad[n]
+			m++
+			continue
+		}
+
+		if m>=1 && n<ln-1	&& bytes.Contains([]byte(" :,}-"),[]byte{bad[m-1]}) && bad[n]=='0' && bytes.Contains([]byte("0123456789"),[]byte{bad[n+1]})	{
+			continue
+		}
+		bad[m]=bad[n]
+		m++
+	}
+	for n:=m;n<ln;n++	{
+		bad[n]=' '
+	}
+//	log.Println("(FixJSON) After: ",bad)
 }
