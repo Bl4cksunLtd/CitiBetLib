@@ -55,7 +55,7 @@ type	Runner	struct	{
 	TrainerName		string
 	HsName			string
 	Draw			int			`json:",string"`
-	Wgt				float64
+	Wgt				float64		`json:",string"`
 }
 
 type	RunnerListResponse	struct	{

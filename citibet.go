@@ -16,7 +16,7 @@ var		(
 )
 
 const	(
-	version	=	"1.0b"
+	version	=	"1.0c"
 )
 
 
