@@ -50,12 +50,12 @@ type	EventListResponse	struct	{
 }
 
 type	Runner	struct	{
-	No				int			`json:",string"`
+	No				string
 	JockeyName		string
 	TrainerName		string
 	HsName			string
-	Draw			int			`json:",string"`
-	Wgt				float64		`json:",string"`
+	Draw			string		//	`json:",string"`
+	Wgt				string		// `json:",string"`
 }
 
 type	RunnerListResponse	struct	{
@@ -73,8 +73,7 @@ type 	Pending		struct	{
 	WinTickets		int
 	PlaceTickets	int
 	TicketPrice		float64
-	WinLimit		int
-	PlaceLimit		int
+	Limits			string
 }
 
 type	ResponseStatus	struct	{

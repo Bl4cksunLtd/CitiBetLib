@@ -133,7 +133,13 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pendin
 	if err != nil {
 		log.Fatal("(BetPendingList) ReadAll failed: ",err)
 	}
-
+	if len(data)==0		{
+		if c.config.Info	{
+			log.Println("(BetPendingList) Get Returned Null: URL: ",url)
+		}
+		return			// returns no error -> empty structure
+	}
+	
 	if resp.StatusCode != 200 {
 		return bpl,errors.New(resp.Status)
 	}
@@ -143,26 +149,28 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pendin
 	}
 	
 	lines:=strings.Split(string(data),"\n")
-	var		ri,hi,wt,pt,wl,pl	int
+	var		ri,hi,wt,pt				int
 	var		tp						float64
 	for i:=0;i<len(lines);i++	{
+		if len(lines[i])==0	{
+			continue
+		}
 		field:=strings.Split(lines[i],"\t")
-		ri,_=strconv.Atoi(field[0])
-		hi,_=strconv.Atoi(field[1])
-		wt,_=strconv.Atoi(field[2])
-		pt,_=strconv.Atoi(field[3])
-		tp,_=strconv.ParseFloat(field[4],64)
-		limits:=strings.Split(field[5],":")
-		wl,_=strconv.Atoi(limits[0])
-		pl,_=strconv.Atoi(limits[1])
+		ri,e1=strconv.Atoi(field[0])
+		hi,e2=strconv.Atoi(field[1])
+		wt,e3=strconv.Atoi(field[2])
+		pt,e4=strconv.Atoi(field[3])
+		tp,e5=strconv.ParseFloat(field[4],64)
+		if e1!=nil || e2!=nil || e3!=nil || e4!=nil || e5!=nil {
+			log.Fatal("(BetPendingList) Error occured converting lines[i] into numbers.")
+		}
 		bpl=append(bpl,Pending{
 			Race:			ri,
 			Horse:			hi,
 			WinTickets: 	wt,
 			PlaceTickets:	pt,
 			TicketPrice:	tp,
-			WinLimit:		wl,
-			PlaceLimit:		pl})
+			Limits:			field[5]})
 	}
 	
 	return
@@ -196,7 +204,13 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int)	(epl	[]Pendin
 	if err != nil {
 		log.Fatal("(EatPendingList) ReadAll failed: ",err)
 	}
-
+	if len(data)==0		{
+		if c.config.Info	{
+			log.Println("(EatPendingList) Get Returned Null: URL: ",url)
+		}
+		return			// returns no error -> empty structure
+	}
+	
 	if resp.StatusCode != 200 {
 		return epl,errors.New(resp.Status)
 	}
@@ -206,26 +220,25 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int)	(epl	[]Pendin
 	}
 	
 	lines:=strings.Split(string(data),"\n")
-	var		ri,hi,wt,pt,wl,pl	int
+	var		ri,hi,wt,pt				int
 	var		tp						float64
 	for i:=0;i<len(lines);i++	{
 		field:=strings.Split(lines[i],"\t")
-		ri,_=strconv.Atoi(field[0])
-		hi,_=strconv.Atoi(field[1])
-		wt,_=strconv.Atoi(field[2])
-		pt,_=strconv.Atoi(field[3])
-		tp,_=strconv.ParseFloat(field[4],64)
-		limits:=strings.Split(field[5],":")
-		wl,_=strconv.Atoi(limits[0])
-		pl,_=strconv.Atoi(limits[1])
+		ri,e1=strconv.Atoi(field[0])
+		hi,e2=strconv.Atoi(field[1])
+		wt,e3=strconv.Atoi(field[2])
+		pt,e4=strconv.Atoi(field[3])
+		tp,e5=strconv.ParseFloat(field[4],64)
+		if e1!=nil || e2!=nil || e3!=nil || e4!=nil || e5!=nil {
+			log.Fatal("(BetPendingList) Error occured converting lines[i] into numbers.")
+		}
 		epl=append(epl,Pending{
 			Race:			ri,
 			Horse:			hi,
 			WinTickets: 	wt,
 			PlaceTickets:	pt,
 			TicketPrice:	tp,
-			WinLimit:		wl,
-			PlaceLimit:		pl})
+			Limits:			field[5]})
 	}
 	
 	return

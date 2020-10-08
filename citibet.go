@@ -77,7 +77,13 @@ func	(c *Client)Request(url string, v interface{}) error {
 		}
 		return err
 	}
-	FixJSON(data,len(data))
+	if len(data)==0		{
+		if c.config.Info	{
+			log.Println("(Request) Returned Null: URL: ",url)
+		}
+		return	nil		// returns no error -> empty structure
+	}
+	FixJSON(data,len(data)) // deal with leading zeros
 	if resp.StatusCode != 200 {
 		if c.config.Info	{
 			log.Println("(Request) StatusCode not 200: ",resp.StatusCode," Status: ",resp.Status)
@@ -85,9 +91,9 @@ func	(c *Client)Request(url string, v interface{}) error {
 		return errors.New(resp.Status)
 	} else {
 		if err := json.Unmarshal(data, v); err != nil {
-		if c.config.Info	{
-			log.Println("(Request) Unmarshal failed: ",err," raw data: ",data)
-		}
+			if c.config.Info	{
+				log.Println("(Request) Unmarshal failed: ",err," raw data: ",data)
+			}
 			return err
 		}
 	}
