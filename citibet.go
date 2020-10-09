@@ -19,7 +19,9 @@ const	(
 	version	=	"1.0c"
 )
 
-
+func	Version()		string	{
+	return	string(version)
+}
 
 func	NewClient(config	*Config)	(*Client,error)	{
 	if config.UserName==""	{

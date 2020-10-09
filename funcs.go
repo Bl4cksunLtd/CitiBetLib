@@ -150,6 +150,7 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pendin
 	
 	lines:=strings.Split(string(data),"\n")
 	var		ri,hi,wt,pt				int
+	var		e1,e2,e3,e4,e5			error
 	var		tp						float64
 	for i:=0;i<len(lines);i++	{
 		if len(lines[i])==0	{
@@ -221,6 +222,7 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int)	(epl	[]Pendin
 	
 	lines:=strings.Split(string(data),"\n")
 	var		ri,hi,wt,pt				int
+	var		e1,e2,e3,e4,e5			error
 	var		tp						float64
 	for i:=0;i<len(lines);i++	{
 		field:=strings.Split(lines[i],"\t")
