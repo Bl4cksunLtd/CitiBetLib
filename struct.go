@@ -69,7 +69,7 @@ type 	LoginResponse	struct	{
 
 type 	Pending		struct	{
 	Race			int
-	Horse			int
+	Horse			string
 	WinTickets		int
 	PlaceTickets	int
 	TicketPrice		float64

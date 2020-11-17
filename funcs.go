@@ -155,7 +155,7 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pendin
 		}
 		return			// returns no error -> empty structure
 	}
-	var		ri,hi,wt,pt				int
+	var		ri,wt,pt				int
 	var		e1,e2,e3,e4,e5			error
 	var		tp						float64
 	for i:=0;i<len(lines);i++	{
@@ -170,7 +170,7 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pendin
 			continue
 		}
 		ri,e1=strconv.Atoi(field[0])
-		hi,e2=strconv.Atoi(field[1])
+//		hi,e2=strconv.Atoi(field[1])	// horse number is a string as it could be values like 1a
 		wt,e3=strconv.Atoi(field[2])
 		pt,e4=strconv.Atoi(field[3])
 		tp,e5=strconv.ParseFloat(field[4],64)
@@ -179,7 +179,7 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pendin
 		}
 		bpl=append(bpl,Pending{
 			Race:			ri,
-			Horse:			hi,
+			Horse:			field[1],
 			WinTickets: 	wt,
 			PlaceTickets:	pt,
 			TicketPrice:	tp,
@@ -240,7 +240,7 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int)	(epl	[]Pendin
 		return			// returns no error -> empty structure
 	}
 	
-	var		ri,hi,wt,pt				int
+	var		ri,wt,pt				int
 	var		e1,e2,e3,e4,e5			error
 	var		tp						float64
 	for i:=0;i<len(lines);i++	{
@@ -255,7 +255,7 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int)	(epl	[]Pendin
 			continue
 		}
 		ri,e1=strconv.Atoi(field[0])
-		hi,e2=strconv.Atoi(field[1])
+//		hi,e2=strconv.Atoi(field[1])
 		wt,e3=strconv.Atoi(field[2])
 		pt,e4=strconv.Atoi(field[3])
 		tp,e5=strconv.ParseFloat(field[4],64)
@@ -264,7 +264,7 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int)	(epl	[]Pendin
 		}
 		epl=append(epl,Pending{
 			Race:			ri,
-			Horse:			hi,
+			Horse:			field[1],
 			WinTickets: 	wt,
 			PlaceTickets:	pt,
 			TicketPrice:	tp,
