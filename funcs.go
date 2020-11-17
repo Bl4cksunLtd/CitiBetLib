@@ -149,6 +149,12 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pendin
 	}
 	
 	lines:=strings.Split(string(data),"\n")
+	if len(lines)==0	{
+		if c.config.Info	{
+			log.Println("(BetPendingList) zero lines: URL: ",url)
+		}
+		return			// returns no error -> empty structure
+	}
 	var		ri,hi,wt,pt				int
 	var		e1,e2,e3,e4,e5			error
 	var		tp						float64
@@ -157,13 +163,19 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pendin
 			continue
 		}
 		field:=strings.Split(lines[i],"\t")
+		if len(field)!=6	{
+			if c.config.Info	{
+				log.Println("(BetPendingList) Invalid field length: ",lines[i]," from :", url)
+			}
+			continue
+		}
 		ri,e1=strconv.Atoi(field[0])
 		hi,e2=strconv.Atoi(field[1])
 		wt,e3=strconv.Atoi(field[2])
 		pt,e4=strconv.Atoi(field[3])
 		tp,e5=strconv.ParseFloat(field[4],64)
 		if e1!=nil || e2!=nil || e3!=nil || e4!=nil || e5!=nil {
-			log.Fatal("(BetPendingList) Error occured converting lines[i] into numbers.")
+			log.Fatal("(BetPendingList) Error occured converting ",lines[i]," into numbers.")
 		}
 		bpl=append(bpl,Pending{
 			Race:			ri,
@@ -221,18 +233,34 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int)	(epl	[]Pendin
 	}
 	
 	lines:=strings.Split(string(data),"\n")
+	if len(lines)==0	{
+		if c.config.Info	{
+			log.Println("(EatPendingList) zero lines: URL: ",url)
+		}
+		return			// returns no error -> empty structure
+	}
+	
 	var		ri,hi,wt,pt				int
 	var		e1,e2,e3,e4,e5			error
 	var		tp						float64
 	for i:=0;i<len(lines);i++	{
+		if len(lines[i])==0	{
+			continue
+		}
 		field:=strings.Split(lines[i],"\t")
+		if len(field)!=6	{
+			if c.config.Info	{
+				log.Println("(EatPendingList) Invalid field length: ",lines[i]," from :", url)
+			}
+			continue
+		}
 		ri,e1=strconv.Atoi(field[0])
 		hi,e2=strconv.Atoi(field[1])
 		wt,e3=strconv.Atoi(field[2])
 		pt,e4=strconv.Atoi(field[3])
 		tp,e5=strconv.ParseFloat(field[4],64)
 		if e1!=nil || e2!=nil || e3!=nil || e4!=nil || e5!=nil {
-			log.Fatal("(BetPendingList) Error occured converting lines[i] into numbers.")
+			log.Fatal("(BetPendingList) Error occured converting ",lines[i]," into numbers.")
 		}
 		epl=append(epl,Pending{
 			Race:			ri,
