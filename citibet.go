@@ -16,7 +16,7 @@ var		(
 )
 
 const	(
-	version	=	"1.0e"
+	version	=	"1.0fbeta"
 )
 
 func	Version()		string	{
