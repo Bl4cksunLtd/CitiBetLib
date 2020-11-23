@@ -105,16 +105,21 @@ func	(c	*Client)RunnerList(rd string,cId	int,r	int)	(rlr	RunnerListResponse,err 
 	return
 }
 
-func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pending,err error)	{
+func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(bpl	[]Pending,err error)	{
+	inplaystr:=""
+	if inplay	{
+		inplaystr="&lu=1"
+	}
 
-	url:=fmt.Sprintf("%sapi/service/betdata?api=%s&uid=%s&race_date=%s&race_type=%s&rc=%d&c=%d&m=SG",
+	url:=fmt.Sprintf("%sapi/service/betdata?api=%s&uid=%s&race_date=%s&race_type=%s&rc=%d&c=%d&m=SG%s",
 					c.config.Url,
 					c.config.ApiKey,
 					c.config.UserName,
 					rd,
 					rt,
 					r,
-					cur)
+					cur,
+					inplaystr)
 					
 	if c.config.Info	{
 		log.Printf("(BetPendingList) Url:%s\n",url)
@@ -189,16 +194,21 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pendin
 	return
 }
 
-func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int)	(epl	[]Pending,err error)	{
+func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(epl	[]Pending,err error)	{
+	inplaystr:=""
+	if inplay	{
+		inplaystr="&lu=1"
+	}
 
-	url:=fmt.Sprintf("%sapi/service/eatdata?api=%s&uid=%s&race_date=%s&race_type=%s&rc=%d&c=%d&m=SG",
+	url:=fmt.Sprintf("%sapi/service/eatdata?api=%s&uid=%s&race_date=%s&race_type=%s&rc=%d&c=%d&m=SG%s",
 					c.config.Url,
 					c.config.ApiKey,
 					c.config.UserName,
 					rd,
 					rt,
 					r,
-					cur)
+					cur,
+					inplaystr)
 					
 	if c.config.Info	{
 		log.Printf("(EatPendingList) Url:%s\n",url)
