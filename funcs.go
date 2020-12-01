@@ -283,3 +283,29 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(
 	
 	return
 }
+
+
+func	(c	*Client)News(cardId	int)	(news	[]string,err error)	{
+	var	newsJSON		News
+	url:=fmt.Sprintf("%sapi/service/news?api=%s&uid=%s&location=%d",
+					c.config.Url,
+					c.config.ApiKey,
+					c.config.UserName,
+					cardId)
+					
+	if c.config.Info	{
+		log.Printf("(News) Url:%s\n",url)
+	}
+	if c.config.Debug	{
+		return	
+	}	
+	err=c.Request(url,&newsJSON)
+	if err!=nil	{
+		log.Fatal("(News) Request failed: ",err)
+	}
+	if c.config.Info	{
+		log.Println("(News) Request returned : ",news)
+	}
+	news=append(news,newsJSON.News1,newsJSON.News2,newsJSON.News3)
+	return
+}

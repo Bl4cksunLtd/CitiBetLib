@@ -80,3 +80,9 @@ type	ResponseStatus	struct	{
 	Status			int
 	Code			int
 }
+
+type	News		struct	{
+	News1			string
+	News2			string
+	News3			string
+}
