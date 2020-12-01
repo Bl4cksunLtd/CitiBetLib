@@ -86,3 +86,34 @@ type	News		struct	{
 	News2			string
 	News3			string
 }
+
+type	MainInfo	struct	{
+	Balance			float64		`json:",string"`
+	Pls				float64		`json:",string"`
+	IsLocked		bool		`json:",string"`
+	IsSuspended		bool		`json:",string"`
+	BetTixLmt		float64		`json:",string"`
+	EatTixLmt		float64		`json:",string"`
+	BetTixLmtLive	float64		`json:",string"`
+	EatTixLmtLive	float64		`json:",string"`
+	QBetTixLmt		float64		`json:",string"`
+	QEatTixLmt		float64		`json:",string"`
+	BetTixLmtMinor	float64		`json:",string"`
+	EatTixLmtMinor	float64		`json:",string"`
+	QBetTixLmtMinor	float64		`json:",string"`
+	QEatTixLmtMinor	float64		`json:",string"`
+	BetTax			float64		`json:",string"`
+	EatTax			float64		`json:",string"`
+	FcBetTax		float64		`json:",string"`
+	FcEatTax		float64		`json:",string"`
+	QBetTax			float64		`json:",string"`
+	QEatTax			float64		`json:",string"`
+	BetTaxLive		float64		`json:",string"`
+	EatTaxLive		float64		`json:",string"`
+	BetTaxMinor		float64		`json:",string"`
+	EatTaxMinor		float64		`json:",string"`
+	FcBetTaxMinor	float64		`json:",string"`
+	FcEatTaxMinor	float64		`json:",string"`
+	QBetTaxMinor	float64		`json:",string"`
+	QEatTaxMinor	float64		`json:",string"`
+}

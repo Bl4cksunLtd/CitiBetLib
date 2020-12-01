@@ -285,6 +285,29 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(
 }
 
 
+func	(c	*Client)MainInfo()	(maininfo MainInfo,err error)	{
+	url:=fmt.Sprintf("%sapi/service/datastore?api=%s&uid=%s&x=%0.9f",
+					c.config.Url,
+					c.config.ApiKey,
+					c.config.UserName,
+					rand.Float64())
+					
+	if c.config.Info	{
+		log.Printf("(MainInfo) Url:%s\n",url)
+	}
+	if c.config.Debug	{
+		return	
+	}	
+	err=c.Request(url,&maininfo)
+	if err!=nil	{
+		log.Fatal("(MainInfo) Request failed: ",err)
+	}
+	if c.config.Info	{
+		log.Println("(MainInfo) Request returned : ",maininfo)
+	}
+	return
+}
+
 func	(c	*Client)News(cardId	int)	(news	[]string,err error)	{
 	var	newsJSON		News
 	url:=fmt.Sprintf("%sapi/service/news?api=%s&uid=%s&location=%d",
