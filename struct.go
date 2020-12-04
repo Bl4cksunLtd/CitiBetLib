@@ -17,6 +17,7 @@ type	Config	struct	{
 	Url			string			//	http://citi-bet-ip/
 	Debug		bool			// 	don't send http requests
 	Info		bool			//	report Urls used via log
+	Timeout		int				// 	http client timeout
 }
 
 

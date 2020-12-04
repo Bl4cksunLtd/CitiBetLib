@@ -16,7 +16,7 @@ var		(
 )
 
 const	(
-	version	=	"1.0hbeta"
+	version	=	"1.0ibeta"
 )
 
 func	Version()		string	{
@@ -34,6 +34,10 @@ func	NewClient(config	*Config)	(*Client,error)	{
 		return nil,errors.New("NewClient: Config missing Url")
 	}
 
+	if config.Timeout==0	{
+		config.Timeout=2
+	}
+
 	rand.Seed(time.Now().UnixNano())
 
 	c:=new(Client)
@@ -42,12 +46,12 @@ func	NewClient(config	*Config)	(*Client,error)	{
 	
 	netTransport:=&http.Transport{
 		Dial:	(&net.Dialer{
-					Timeout: 2 * time.Second,
+					Timeout: time.Duration(config.Timeout) * time.Second,
 				}).Dial,
-				TLSHandshakeTimeout: 2*time.Second,
+				TLSHandshakeTimeout: time.Duration(config.Timeout)*time.Second,
 	}
 	c.HttpClient=&http.Client{
-		Timeout: 	2*time.Second,
+		Timeout: 	time.Duration(config.Timeout)*time.Second,
 		Transport:	netTransport,
 	}
 	return c,nil
