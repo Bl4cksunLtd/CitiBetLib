@@ -16,7 +16,7 @@ var		(
 )
 
 const	(
-	version	=	"1.0ibeta"
+	version	=	"1.0jbeta"
 )
 
 func	Version()		string	{
@@ -114,6 +114,9 @@ func	FixJSON(bad	[]byte,ln int)	{
 	var	quote		bool
 	var	m				int
 	for n:=0;n<ln;n++	{
+		if bad[n]=='\t'	{
+			bad[n]=' '
+		}
 		if bad[n]=='"'	{
 			quote=!quote
 			bad[m]=bad[n]
