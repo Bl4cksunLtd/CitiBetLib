@@ -16,7 +16,7 @@ var		(
 )
 
 const	(
-	version	=	"1.0jbeta"
+	version	=	"1.1beta"
 )
 
 func	Version()		string	{
@@ -83,10 +83,11 @@ func	(c *Client)Request(url string, v interface{}) error {
 		}
 		return err
 	}
-	if len(data)==0		{
+	if len(data)==0	|| data[0]==10	{
 		if c.config.Info	{
-			log.Println("(Request) Returned Null: URL: ",url)
+			log.Println("(Request) Returned Null: URL: ",url,data)
 		}
+		log.Println("(Request) Returned Null: URL: ",url,data)
 		return	nil		// returns no error -> empty structure
 	}
 	FixJSON(data,len(data)) // deal with leading zeros
@@ -97,9 +98,62 @@ func	(c *Client)Request(url string, v interface{}) error {
 		return errors.New(resp.Status)
 	} else {
 		if err := json.Unmarshal(data, v); err != nil {
-			if c.config.Info	{
+//			if c.config.Info	{
 				log.Println("(Request) Unmarshal failed: ",err," raw data: ",data)
-			}
+//			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+func	(c *Client)RequestDebug(url string, v interface{}) error {
+
+// params are included in the url
+
+	if c.config.Info	{
+		log.Println("(Request) Url: ",url)
+	}
+
+	
+	resp, err := c.HttpClient.Get(url)
+
+	if err != nil {
+		if c.config.Info	{
+			log.Println("(Request) Get failed: ",err," URL: ",url)
+		}
+		return err
+	}
+
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		if c.config.Info	{
+			log.Println("(Request) ReadAll failed: ",err," URL: ",url)
+		}
+		return err
+	}
+	if len(data)==0	|| data[0]==10	{
+		if c.config.Info	{
+			log.Println("(Request) Returned Null: URL: ",url,data)
+		}
+		log.Println("(Request) Returned Null: URL: ",url,data)
+		return	nil		// returns no error -> empty structure
+	}
+	FixJSON(data,len(data)) // deal with leading zeros
+	if resp.StatusCode != 200 {
+		if c.config.Info	{
+			log.Println("(Request) StatusCode not 200: ",resp.StatusCode," Status: ",resp.Status)
+		}
+		return errors.New(resp.Status)
+	} else {
+		log.Println("(Request) Data: ",data)
+		if err := json.Unmarshal(data, v); err != nil {
+//			if c.config.Info	{
+				log.Println("(Request) Unmarshal failed: ",err," raw data: ",data)
+//			}
 			return err
 		}
 	}
