@@ -410,7 +410,10 @@ func	(c	*Client)SubmitBet(racedate string,racetype string,race int,horse string,
 	if c.config.Info	{
 		log.Printf("(SubmitBet) Url:%s\n",url)
 	}
-log.Printf("(SubmitBet) Url:%s\n",url)
+	if !c.config.Bet	{
+		log.Printf("(SubmitBet) Url:%s\n",url)
+		return
+	}
 	if c.config.Debug	{
 		return	
 	}	
@@ -478,7 +481,10 @@ func	(c	*Client)SubmitEat(racedate string,racetype string,race int,horse string,
 	if c.config.Info	{
 		log.Printf("(SubmitEat) Url:%s\n",url)
 	}
-log.Printf("(SubmitEat) Url:%s\n",url)
+	if !c.config.Bet	{
+		log.Printf("(SubmitEat) Url:%s\n",url)
+		return
+	}
 	if c.config.Debug	{
 		return	
 	}	
