@@ -16,7 +16,7 @@ var		(
 )
 
 const	(
-	version	=	"1.0e"
+	version	=	"1.1a"
 )
 
 func	Version()		string	{
@@ -34,6 +34,10 @@ func	NewClient(config	*Config)	(*Client,error)	{
 		return nil,errors.New("NewClient: Config missing Url")
 	}
 
+	if config.Timeout==0	{
+		config.Timeout=2
+	}
+
 	rand.Seed(time.Now().UnixNano())
 
 	c:=new(Client)
@@ -42,12 +46,12 @@ func	NewClient(config	*Config)	(*Client,error)	{
 	
 	netTransport:=&http.Transport{
 		Dial:	(&net.Dialer{
-					Timeout: 2 * time.Second,
+					Timeout: time.Duration(config.Timeout) * time.Second,
 				}).Dial,
-				TLSHandshakeTimeout: 2*time.Second,
+				TLSHandshakeTimeout: time.Duration(config.Timeout)*time.Second,
 	}
 	c.HttpClient=&http.Client{
-		Timeout: 	2*time.Second,
+		Timeout: 	time.Duration(config.Timeout)*time.Second,
 		Transport:	netTransport,
 	}
 	return c,nil
@@ -79,10 +83,11 @@ func	(c *Client)Request(url string, v interface{}) error {
 		}
 		return err
 	}
-	if len(data)==0		{
+	if len(data)==0	|| data[0]==10	{
 		if c.config.Info	{
-			log.Println("(Request) Returned Null: URL: ",url)
+			log.Println("(Request) Returned Null: URL: ",url,data)
 		}
+		log.Println("(Request) Returned Null: URL: ",url,data)
 		return	nil		// returns no error -> empty structure
 	}
 	FixJSON(data,len(data)) // deal with leading zeros
@@ -93,9 +98,62 @@ func	(c *Client)Request(url string, v interface{}) error {
 		return errors.New(resp.Status)
 	} else {
 		if err := json.Unmarshal(data, v); err != nil {
-			if c.config.Info	{
+//			if c.config.Info	{
 				log.Println("(Request) Unmarshal failed: ",err," raw data: ",data)
-			}
+//			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+func	(c *Client)RequestDebug(url string, v interface{}) error {
+
+// params are included in the url
+
+	if c.config.Info	{
+		log.Println("(Request) Url: ",url)
+	}
+
+	
+	resp, err := c.HttpClient.Get(url)
+
+	if err != nil {
+		if c.config.Info	{
+			log.Println("(Request) Get failed: ",err," URL: ",url)
+		}
+		return err
+	}
+
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		if c.config.Info	{
+			log.Println("(Request) ReadAll failed: ",err," URL: ",url)
+		}
+		return err
+	}
+	if len(data)==0	|| data[0]==10	{
+		if c.config.Info	{
+			log.Println("(Request) Returned Null: URL: ",url,data)
+		}
+		log.Println("(Request) Returned Null: URL: ",url,data)
+		return	nil		// returns no error -> empty structure
+	}
+	FixJSON(data,len(data)) // deal with leading zeros
+	if resp.StatusCode != 200 {
+		if c.config.Info	{
+			log.Println("(Request) StatusCode not 200: ",resp.StatusCode," Status: ",resp.Status)
+		}
+		return errors.New(resp.Status)
+	} else {
+		log.Println("(Request) Data: ",data)
+		if err := json.Unmarshal(data, v); err != nil {
+//			if c.config.Info	{
+				log.Println("(Request) Unmarshal failed: ",err," raw data: ",data)
+//			}
 			return err
 		}
 	}
@@ -110,6 +168,9 @@ func	FixJSON(bad	[]byte,ln int)	{
 	var	quote		bool
 	var	m				int
 	for n:=0;n<ln;n++	{
+		if bad[n]=='\t'	{
+			bad[n]=' '
+		}
 		if bad[n]=='"'	{
 			quote=!quote
 			bad[m]=bad[n]

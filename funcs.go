@@ -4,7 +4,7 @@ import (
 //	"time"
 //	"net"
 	"errors"
-//	"encoding/json"
+	"encoding/json"
 	"log"
 	"fmt"
 	"math/rand"
@@ -12,6 +12,22 @@ import (
 	"strings"
 	"strconv"
 )
+
+func (cf *CBfloat64) UnmarshalJSON(b []byte) error {
+	if b[0] != '"' {
+		  return json.Unmarshal(b, (*float64)(cf))
+	}
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		  return err
+	}
+	fl, err := strconv.ParseFloat(s,64)
+	if err != nil {
+		  return err
+	}
+	*cf = CBfloat64(fl)
+	return nil
+}
 
 func	(c 	*Client)Login()	(ResponseStatus,error)	{
 	url:=fmt.Sprintf("%sapi/service/login?api=%s&uid=%s&x=%.16f",
@@ -105,16 +121,21 @@ func	(c	*Client)RunnerList(rd string,cId	int,r	int)	(rlr	RunnerListResponse,err 
 	return
 }
 
-func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pending,err error)	{
+func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(bpl	[]Pending,err error)	{
+	inplaystr:=""
+	if inplay	{
+		inplaystr="&lu=1"
+	}
 
-	url:=fmt.Sprintf("%sapi/service/betdata?api=%s&uid=%s&race_date=%s&race_type=%s&rc=%d&c=%d&m=SG",
+	url:=fmt.Sprintf("%sapi/service/betdata?api=%s&uid=%s&race_date=%s&race_type=%s&rc=%d&c=%d&m=SG%s",
 					c.config.Url,
 					c.config.ApiKey,
 					c.config.UserName,
 					rd,
 					rt,
 					r,
-					cur)
+					cur,
+					inplaystr)
 					
 	if c.config.Info	{
 		log.Printf("(BetPendingList) Url:%s\n",url)
@@ -189,16 +210,21 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int)	(bpl	[]Pendin
 	return
 }
 
-func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int)	(epl	[]Pending,err error)	{
+func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(epl	[]Pending,err error)	{
+	inplaystr:=""
+	if inplay	{
+		inplaystr="&lu=1"
+	}
 
-	url:=fmt.Sprintf("%sapi/service/eatdata?api=%s&uid=%s&race_date=%s&race_type=%s&rc=%d&c=%d&m=SG",
+	url:=fmt.Sprintf("%sapi/service/eatdata?api=%s&uid=%s&race_date=%s&race_type=%s&rc=%d&c=%d&m=SG%s",
 					c.config.Url,
 					c.config.ApiKey,
 					c.config.UserName,
 					rd,
 					rt,
 					r,
-					cur)
+					cur,
+					inplaystr)
 					
 	if c.config.Info	{
 		log.Printf("(EatPendingList) Url:%s\n",url)
@@ -271,5 +297,358 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int)	(epl	[]Pendin
 			Limits:			field[5]})
 	}
 	
+	return
+}
+
+
+func	(c	*Client)MainInfo()	(maininfo MainInfo,err error)	{
+	url:=fmt.Sprintf("%sapi/service/datastore?api=%s&uid=%s&x=%0.9f",
+					c.config.Url,
+					c.config.ApiKey,
+					c.config.UserName,
+					rand.Float64())
+					
+	if c.config.Info	{
+		log.Printf("(MainInfo) Url:%s\n",url)
+	}
+	if c.config.Debug	{
+		return	
+	}	
+	err=c.Request(url,&maininfo)
+	if err!=nil	{
+		log.Fatal("(MainInfo) Request failed: ",err)
+	}
+	if c.config.Info	{
+		log.Println("(MainInfo) Request returned : ",maininfo)
+	}
+	return
+}
+
+func	(c	*Client)TransActionDetails(racedate string,racetype string,race int)	(tad TransactionDetails,err error)	{
+	url:=fmt.Sprintf("%sapi/service/transactionsdetails?api=%s&uid=%s&race_date=%s&race_type=%s&race=%d&rd=%0.9f",
+					c.config.Url,
+					c.config.ApiKey,
+					c.config.UserName,
+					racedate,
+					racetype,
+					race,
+					rand.Float64())
+					
+	if c.config.Info	{
+		log.Printf("(TransActionDetails) Url:%s\n",url)
+	}
+log.Printf("(TransActionDetails) Url:%s\n",url)
+	if c.config.Debug	{
+		return	
+	}	
+	err=c.Request(url,&tad)
+	if err!=nil	{
+		log.Fatal("(TransActionDetails) Request failed: ",err)
+	}
+	if c.config.Info	{
+		log.Println("(TransActionDetails) Request returned : ",tad)
+	}
+log.Println("(TransActionDetails) Request returned : ",tad)
+	return
+}
+
+
+func	(c	*Client)Transactions(racedate string,racetype string,race int)	(tad []Transaction,err error)	{
+	url:=fmt.Sprintf("%sapi/service/transactions?api=%s&uid=%s&type=query&race_date=%s&race_type=%s&race=%d&rd=%0.9f",
+					c.config.Url,
+					c.config.ApiKey,
+					c.config.UserName,
+					racedate,
+					racetype,
+					race,
+					rand.Float64())
+					
+	if c.config.Info	{
+		log.Printf("(TransActions) Url:%s\n",url)
+	}
+log.Printf("(TransActions) Url:%s\n",url)
+	if c.config.Debug	{
+		return	
+	}	
+	err=c.Request(url,&tad)
+	if err!=nil	{
+		log.Fatal("(TransActions) Request failed: ",err)
+	}
+	if c.config.Info	{
+		log.Println("(TransActions) Request returned : ",tad)
+	}
+log.Println("(TransActions) Request returned : ",tad)
+	return
+}
+
+func	(c	*Client)SubmitBet(racedate string,racetype string,race int,horse string,win int,place int,
+									amount float64,wl float64,pl float64,
+									wtck	int,ptck	int,live bool)	(bs BetResponse,err error)	{
+	var	livestr		string
+	if live	{
+		livestr=fmt.Sprintf("&show=%d&lu=1",race)
+	}
+	url:=fmt.Sprintf("%sapi/service/bets?api=%s&uid=%s&race_date=%s&race_type=%s&race=%d&horse=%s&win=%d&place=%d&amount=%.2f"+
+						"&l_win=%.1f&l_place=%.1f&wtck=%d&ptck=%d%s&rd=%0.9f",
+					c.config.Url,
+					c.config.ApiKey,
+					c.config.UserName,
+					racedate,
+					racetype,
+					race,
+					horse,
+					win,
+					place,
+					amount,
+					wl,
+					pl,
+					wtck,
+					ptck,
+					livestr,
+					rand.Float64())
+					
+	if c.config.Info	{
+		log.Printf("(SubmitBet) Url:%s\n",url)
+	}
+	if !c.config.Bet	{
+		log.Printf("(SubmitBet) Url:%s\n",url)
+		return
+	}
+	if c.config.Debug	{
+		return	
+	}	
+	err=c.RequestDebug(url,&bs)
+	if err!=nil	{
+		log.Fatal("(SubmitBet) Request failed: ",err)
+	} 
+	if c.config.Info	{
+		log.Println("(SubmitBet) Request returned : ",bs)
+	}
+log.Println("(SubmitBet) Request returned : ",bs)
+	if len(bs.Bid)>0	{
+		b,h,a,lw,lp,w,p:=ParseBid(bs.Bid[0])
+		log.Println("(SubmitBet.ParseBid) : ",b,h,a,lw,lp,w,p)
+		bs.Win=w
+		bs.Place=p
+		bs.BetId=b
+		bs.Pending=1
+	}
+	if len(bs.Transacted)>0	{
+		ht,wt,pt:=ParseTransacted(bs.Transacted[0])
+		log.Println("(SubmitBet.ParseTransacted) : ",ht,wt,pt)
+	}
+	return
+}
+
+func	(c	*Client)SubmitBetRequest(racedate string,racetype string,race int,horse string,win int,place int,
+									amount float64,wl float64,pl float64,
+									wtck	int,ptck	int)	(bs BetResponse,err error)	{
+	return c.SubmitBet(racedate,racetype,race,horse,win,place,amount,wl,pl,wtck,ptck,false)
+}
+
+func	(c	*Client)SubmitLiveBetRequest(racedate string,racetype string,race int,horse string,win int,place int,
+									amount float64,wl float64,pl float64,
+									wtck	int,ptck	int)	(bs BetResponse,err error)	{
+	return c.SubmitBet(racedate,racetype,race,horse,win,place,amount,wl,pl,wtck,ptck,true)
+}
+
+func	(c	*Client)SubmitEat(racedate string,racetype string,race int,horse string,win int,place int,
+									amount float64,wl float64,pl float64,
+									wtck	int,ptck	int,live bool)	(bs BetResponse,err error)	{
+	var	livestr		string
+	if live	{
+		livestr=fmt.Sprintf("&show=%d&lu=1",race)
+	}
+	url:=fmt.Sprintf("%sapi/service/bookings?api=%s&uid=%s&race_date=%s&race_type=%s&race=%d&horse=%s&win=%d&place=%d&amount=%.2f"+
+						"&l_win=%.1f&l_place=%.1f&wtck=%d&ptck=%d%s&rd=%0.9f",
+					c.config.Url,
+					c.config.ApiKey,
+					c.config.UserName,
+					racedate,
+					racetype,
+					race,
+					horse,
+					win,
+					place,
+					amount,
+					wl,
+					pl,
+					wtck,
+					ptck,
+					livestr,
+					rand.Float64())
+					
+	if c.config.Info	{
+		log.Printf("(SubmitEat) Url:%s\n",url)
+	}
+	if !c.config.Bet	{
+		log.Printf("(SubmitEat) Url:%s\n",url)
+		return
+	}
+	if c.config.Debug	{
+		return	
+	}	
+	err=c.RequestDebug(url,&bs)
+	if err!=nil	{
+		log.Fatal("(SubmitEat) Request failed: ",err)
+	}  
+	if c.config.Info	{
+		log.Println("(SubmitEat) Request returned : ",bs)
+	}
+	if len(bs.Bid)>0	{
+		b,h,a,lw,lp,w,p:=ParseBid(bs.Bid[0])
+		log.Println("(SubmitEat.ParseBid) : ",b,h,a,lw,lp,w,p)
+		bs.Win=w
+		bs.Place=p
+		bs.BetId=b
+		bs.Pending=1
+	}
+	if len(bs.Transacted)>0	{
+		ht,wt,pt:=ParseTransacted(bs.Transacted[0])
+		log.Println("(SubmitEat.ParseTransacted) : ",ht,wt,pt)
+	}
+	
+	return
+}
+
+func	ParseBid(bidstr string)	(bid int64,horse string,amount float64,lwin,lplace float64,win,place float64)	{
+	if len(bidstr)==0	{
+		return
+	}
+	str:=strings.ReplaceAll(bidstr,"[","")
+	str=strings.ReplaceAll(str,"]","")
+	
+	bids := strings.Split(str, "_")
+	if len(bids)<7	{
+		log.Fatal("(ParseBid) Invalid string len : ",bids)
+	}
+	log.Println("(ParseBid) Bids : ",bids)
+	
+	bid,err:=strconv.ParseInt(bids[0],10,64)
+	log.Printf("(ParseBid) {%s} = %d : %v\n",bids[0],bid,err)
+	horse=bids[1]
+	amount,_=strconv.ParseFloat(bids[2],64)
+	lwin,_=strconv.ParseFloat(bids[3],64)
+	lplace,_=strconv.ParseFloat(bids[4],64)
+	win,_=strconv.ParseFloat(bids[5],64)
+	place,_=strconv.ParseFloat(bids[6],64)
+	log.Println("(ParseBid) ",str," = ",bid,horse,amount,lwin,lplace,win,place)
+	return
+}
+
+func ParseTransacted(str string)	(horse string,win,place float64)	{
+	if len(str)==0	{
+		return
+	}
+	trans:= strings.Split(str, "_")
+	if len(trans)<3	{
+		log.Fatal("(ParseTransacted) Invalid string len : ",trans)
+	}
+	log.Println("(ParseTransacted) Trans: ",trans)
+	horse=trans[0]
+	win,_=strconv.ParseFloat(trans[1],64)
+	place,_=strconv.ParseFloat(trans[2],64)
+	log.Printf("(ParseTransacted) %s = %s, %.2f, %.2f\n",str,horse,win,place)
+	return
+}
+	
+	
+
+
+func	(c	*Client)SubmitEatRequest(racedate string,racetype string,race int,horse string,win int,place int,
+									amount float64,lwin float64,pwin float64,
+									wtck	int,ptck	int)	(bs BetResponse,err error)	{
+	return c.SubmitEat(racedate,racetype,race,horse,win,place,amount,lwin,pwin,wtck,ptck,false)
+}
+
+func	(c	*Client)SubmitLiveEatRequest(racedate string,racetype string,race int,horse string,win int,place int,
+									amount float64,lwin float64,pwin float64,
+									wtck	int,ptck	int)	(bs BetResponse,err error)	{
+	return c.SubmitEat(racedate,racetype,race,horse,win,place,amount,lwin,pwin,wtck,ptck,true)
+}
+
+
+func	(c	*Client)DeleteBet(racedate string,racetype string,race int,bid int64,bettype string,x int)	(rs ResponseStatus,err error)	{
+	url:=fmt.Sprintf("%sapi/service/transactions?api=%s&uid=%s&race_date=%s&race_type=%s&type=del&race=%d&bid=%d"+
+					"&betType=%s&x=%d&show=%d&rd=%0.9f",
+					c.config.Url,
+					c.config.ApiKey,
+					c.config.UserName,
+					racedate,
+					racetype,
+					race,
+					bid,
+					bettype,
+					x,
+					race,
+					rand.Float64())
+					
+	if c.config.Info	{
+		log.Printf("(DeleteBet) Url:%s\n",url)
+	}
+log.Printf("(DeleteBet) Url:%s\n",url)
+	if c.config.Debug	{
+		return	
+	}	
+	err=c.Request(url,&rs)
+	if err!=nil	{
+		log.Fatal("(DeleteBet) Request failed: ",err)
+	} 
+	if c.config.Info	{
+		log.Println("(DeleteBet) Request returned : ",rs)
+	}
+log.Println("(DeleteBet) Request returned : ",rs)
+	return
+}
+
+
+//DeleteBet(racedate string,racetype string,race int,bid int64,bettype string,x int)	(rs ResponseStatus,err error)	{
+func	(c	*Client)DeletePendingBet(racedate string,racetype string,race int,bid int64)	(rs ResponseStatus,err error)	{
+	return c.DeleteBet(racedate,racetype,race,bid,"",1)
+}
+
+func	(c	*Client)DeletePendingEat(racedate string,racetype string,race int,bid int64)	(rs ResponseStatus,err error)	{
+	return c.DeleteBet(racedate,racetype,race,bid,"",2)
+}
+
+func	(c	*Client)DeleteAllPendingBet(racedate string,racetype string,race int,live bool)	(rs ResponseStatus,err error)	{
+	if !live {
+		return c.DeleteBet(racedate,racetype,race,int64(race),racetype,10)
+	}	else	{
+		return c.DeleteBet(racedate,racetype,race,int64(race),racetype,14)
+	}
+	
+}
+
+func	(c	*Client)DeleteAllPendingEat(racedate string,racetype string,race int,live bool)	(rs ResponseStatus,err error)	{
+	if !live	{
+		return c.DeleteBet(racedate,racetype,race,int64(race),racetype,5)
+	}	else	{
+		return c.DeleteBet(racedate,racetype,race,int64(race),racetype,15)
+	}
+}
+
+func	(c	*Client)News(cardId	int)	(news	[]string,err error)	{
+	var	newsJSON		News
+	url:=fmt.Sprintf("%sapi/service/news?api=%s&uid=%s&location=%d",
+					c.config.Url,
+					c.config.ApiKey,
+					c.config.UserName,
+					cardId)
+					
+	if c.config.Info	{
+		log.Printf("(News) Url:%s\n",url)
+	}
+	if c.config.Debug	{
+		return	
+	}	
+	err=c.Request(url,&newsJSON)
+	if err!=nil	{
+		log.Fatal("(News) Request failed: ",err)
+	}
+	if c.config.Info	{
+		log.Println("(News) Request returned : ",news)
+	}
+	news=append(news,newsJSON.News1,newsJSON.News2,newsJSON.News3)
 	return
 }
