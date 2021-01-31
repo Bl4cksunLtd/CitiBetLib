@@ -29,6 +29,10 @@ func (cf *CBfloat64) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+
+// client.Login() returns a responsestatus as returned by citibetlib
+// if the request fails then the response has both fields set to 0
+// debug mode will cause a fatal error on http errors
 func	(c 	*Client)Login()	(ResponseStatus,error)	{
 	url:=fmt.Sprintf("%sapi/service/login?api=%s&uid=%s&x=%.16f",
 					c.config.Url,
@@ -38,20 +42,22 @@ func	(c 	*Client)Login()	(ResponseStatus,error)	{
 	if c.config.Info	{
 		log.Printf("(Login) Url:%s\n",url)
 	}
-	if c.config.Debug	{
-		return	ResponseStatus{1,0},nil
-	}	
-	
 	rs:=ResponseStatus{}
 	err:=c.Request(url,&rs)
 	if err!=nil	{
-		log.Fatal("(Login) Request failed: ",err)
+		if c.config.Info	{
+			log.Println("(Login) Request failed: ",err)
+		}
+		if c.config.Debug	{
+			log.Fatal("(Login) Request failed: ",err)
+		}
+		return rs,errors.New(fmt.Sprintf("(Login) http.Request failed"))
 	}
 	if	rs.Status==0	{
 		if c.config.Info	{
 			log.Println("(Login) Request failed StatusCode: ",rs.Code)
 		}
-		return rs,errors.New(fmt.Sprintf("(Login) Request failed StatusCode: %04d",rs.Code))
+		return rs,errors.New(fmt.Sprintf("(Login) Request failed : %04d",rs.Code))
 	}
 	return rs,nil
 }
@@ -61,12 +67,15 @@ func	(c	*Client)CardList()	(clr	CardListResponse,err	error)	{
 	if c.config.Info	{
 		log.Printf("(CardList) Url:%s\n",url)
 	}
-	if c.config.Debug	{
-		return
-	}	
 	err=c.Request(url,&clr)
 	if err!=nil	{
-		log.Fatal("(Cardlist) Request failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(Cardlist) Request failed: ",err)
+		}
+		if c.config.Info	{
+			log.Println("(Cardlist) Request failed: ",err)
+		}
+		return clr,errors.New(fmt.Sprintf("(CardList) http.Request failed"))
 	}
 	if c.config.Info	{
 		log.Println("(CardList) Request returned : ",clr)
@@ -84,12 +93,15 @@ func	(c	*Client)EventList(rd string,cId	int)	(elr	EventListResponse,err error)	{
 	if c.config.Info	{
 		log.Printf("(EventList) Url:%s\n",url)
 	}
-	if c.config.Debug	{
-		return	
-	}	
 	err=c.Request(url,&elr)
 	if err!=nil	{
-		log.Fatal("(EventList) Request failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(EventList) Request failed: ",err)
+		}	
+		if c.config.Info	{
+			log.Println("(EventList) Request failed: ",err)
+		}
+		return elr,errors.New("(CardList) http.Request failed")
 	}
 	if c.config.Info	{
 		log.Println("(EventList) Request returned : ",elr)
@@ -108,12 +120,15 @@ func	(c	*Client)RunnerList(rd string,cId	int,r	int)	(rlr	RunnerListResponse,err 
 	if c.config.Info	{
 		log.Printf("(RunnerList) Url:%s\n",url)
 	}
-	if c.config.Debug	{
-		return	
-	}	
 	err=c.Request(url,&rlr)
 	if err!=nil	{
-		log.Fatal("(RunnerList) Request failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(RunnerList) Request failed: ",err)
+		}	
+		if c.config.Info	{
+			log.Println("(RunnerList) Request failed: ",err)
+		}
+		return rlr,errors.New("(RunnerList) http.Request failed")
 	}
 	if c.config.Info	{
 		log.Println("(RunnerList) Request returned : ",rlr)
@@ -140,19 +155,28 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(
 	if c.config.Info	{
 		log.Printf("(BetPendingList) Url:%s\n",url)
 	}
-	if c.config.Debug	{
-		return	
-	}	
 	resp, err := c.HttpClient.Get(url)
-
 	if err != nil {
-		log.Fatal("(BetPendingList) Get failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(BetPendingList) Get failed: ",err)
+		}
+		if c.config.Info	{
+			log.Fatal("(BetPendingList) Get failed: ",err)
+		}
+		return bpl,errors.New("(BetPendingList) http.Request failed")
 	}
+
 
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal("(BetPendingList) ReadAll failed: ",err)
+	if err != nil 	{
+		if c.config.Debug	{
+			log.Fatal("(BetPendingList) ReadAll failed: ",err)
+		}	
+		if c.config.Info	{
+			log.Println("(BetPendingList) ReadAll failed: ",err)
+		}
+		return bpl,errors.New("(BetPendingList) http.ReadAll failed")
 	}
 	if len(data)==0		{
 		if c.config.Info	{
@@ -196,7 +220,13 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(
 		pt,e4=strconv.Atoi(field[3])
 		tp,e5=strconv.ParseFloat(field[4],64)
 		if e1!=nil || e2!=nil || e3!=nil || e4!=nil || e5!=nil {
-			log.Fatal("(BetPendingList) Error occured converting ",lines[i]," into numbers.")
+			if c.config.Debug	{
+				log.Fatal("(BetPendingList) Error occured converting ",lines[i]," into numbers.")
+			}
+			if c.config.Info	{
+				log.Println("(BetPendingList) Error occured converting ",lines[i]," into numbers.")
+			}
+			return bpl,errors.New("(BetPendingList) Data is corrupt")
 		}
 		bpl=append(bpl,Pending{
 			Race:			ri,
@@ -229,19 +259,28 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(
 	if c.config.Info	{
 		log.Printf("(EatPendingList) Url:%s\n",url)
 	}
-	if c.config.Debug	{
-		return	
-	}	
 	resp, err := c.HttpClient.Get(url)
 
 	if err != nil {
-		log.Fatal("(EatPendingList) Get failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(EatPendingList) Get failed: ",err)
+		}
+		if c.config.Info	{
+			log.Println("(EatPendingList) Get failed: ",err)
+		}
+		return epl,errors.New("(EatPendingList) http.Request failed")
 	}
 
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal("(EatPendingList) ReadAll failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(EatPendingList) ReadAll failed: ",err)
+		}	
+		if c.config.Info	{
+			log.Println("(EatPendingList) ReadAll failed: ",err)
+		}
+		return epl,errors.New("(EatPendingList) http.ReadAll failed")
 	}
 	if len(data)==0		{
 		if c.config.Info	{
@@ -286,7 +325,13 @@ func	(c	*Client)EatPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(
 		pt,e4=strconv.Atoi(field[3])
 		tp,e5=strconv.ParseFloat(field[4],64)
 		if e1!=nil || e2!=nil || e3!=nil || e4!=nil || e5!=nil {
-			log.Fatal("(BetPendingList) Error occured converting ",lines[i]," into numbers.")
+			if c.config.Debug	{
+				log.Fatal("(EatPendingList) Error occured converting ",lines[i]," into numbers.")
+			}
+			if c.config.Info	{
+				log.Println("(EatPendingList) Error occured converting ",lines[i]," into numbers.")
+			}
+			return epl,errors.New("(EatPendingList) Data is corrupt")
 		}
 		epl=append(epl,Pending{
 			Race:			ri,
@@ -311,12 +356,15 @@ func	(c	*Client)MainInfo()	(maininfo MainInfo,err error)	{
 	if c.config.Info	{
 		log.Printf("(MainInfo) Url:%s\n",url)
 	}
-	if c.config.Debug	{
-		return	
-	}	
 	err=c.Request(url,&maininfo)
 	if err!=nil	{
-		log.Fatal("(MainInfo) Request failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(MainInfo) Request failed: ",err)
+		}
+		if c.config.Info	{
+			log.Println("(MainInfo) Request failed: ",err)
+		}
+		return maininfo,errors.New("(MainInfo) http.Request failed")
 	}
 	if c.config.Info	{
 		log.Println("(MainInfo) Request returned : ",maininfo)
@@ -337,18 +385,19 @@ func	(c	*Client)TransActionDetails(racedate string,racetype string,race int)	(ta
 	if c.config.Info	{
 		log.Printf("(TransActionDetails) Url:%s\n",url)
 	}
-log.Printf("(TransActionDetails) Url:%s\n",url)
-	if c.config.Debug	{
-		return	
-	}	
 	err=c.Request(url,&tad)
 	if err!=nil	{
-		log.Fatal("(TransActionDetails) Request failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(TransActionDetails) Request failed: ",err)
+		}
+		if c.config.Info	{
+			log.Println("(TransActionDetails) Request failed: ",err)
+		}
+		return tad,errors.New("(TransActionDetails) http.Request failed")
 	}
 	if c.config.Info	{
 		log.Println("(TransActionDetails) Request returned : ",tad)
 	}
-log.Println("(TransActionDetails) Request returned : ",tad)
 	return
 }
 
@@ -366,18 +415,19 @@ func	(c	*Client)Transactions(racedate string,racetype string,race int)	(tad []Tr
 	if c.config.Info	{
 		log.Printf("(TransActions) Url:%s\n",url)
 	}
-log.Printf("(TransActions) Url:%s\n",url)
-	if c.config.Debug	{
-		return	
-	}	
 	err=c.Request(url,&tad)
 	if err!=nil	{
-		log.Fatal("(TransActions) Request failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(TransActions) Request failed: ",err)
+		}
+		if c.config.Info	{
+			log.Println("(TransActions) Request failed: ",err)
+		}
+		return tad,errors.New("(TransActions) http.Request failed")
 	}
 	if c.config.Info	{
 		log.Println("(TransActions) Request returned : ",tad)
 	}
-log.Println("(TransActions) Request returned : ",tad)
 	return
 }
 
@@ -414,20 +464,24 @@ func	(c	*Client)SubmitBet(racedate string,racetype string,race int,horse string,
 		log.Printf("(SubmitBet) Url:%s\n",url)
 		return
 	}
-	if c.config.Debug	{
-		return	
-	}	
 	err=c.RequestDebug(url,&bs)
 	if err!=nil	{
-		log.Fatal("(SubmitBet) Request failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(SubmitBet) Request failed: ",err)
+		}
+		if c.config.Info	{
+			log.Println("(SubmitBet) Request failed: ",err)
+		}
+		return bs,errors.New("(SubmitBet) http.Request failed")
 	} 
 	if c.config.Info	{
 		log.Println("(SubmitBet) Request returned : ",bs)
 	}
-log.Println("(SubmitBet) Request returned : ",bs)
 	if len(bs.Bid)>0	{
 		b,h,a,lw,lp,w,p:=ParseBid(bs.Bid[0])
-		log.Println("(SubmitBet.ParseBid) : ",b,h,a,lw,lp,w,p)
+		if c.config.Info	{
+			log.Println("(SubmitBet.ParseBid) : ",b,h,a,lw,lp,w,p)
+		}
 		bs.Win=w
 		bs.Place=p
 		bs.BetId=b
@@ -435,7 +489,9 @@ log.Println("(SubmitBet) Request returned : ",bs)
 	}
 	if len(bs.Transacted)>0	{
 		ht,wt,pt:=ParseTransacted(bs.Transacted[0])
-		log.Println("(SubmitBet.ParseTransacted) : ",ht,wt,pt)
+		if c.config.Info	{
+			log.Println("(SubmitBet.ParseTransacted) : ",ht,wt,pt)
+		}
 	}
 	return
 }
@@ -485,19 +541,24 @@ func	(c	*Client)SubmitEat(racedate string,racetype string,race int,horse string,
 		log.Printf("(SubmitEat) Url:%s\n",url)
 		return
 	}
-	if c.config.Debug	{
-		return	
-	}	
 	err=c.RequestDebug(url,&bs)
 	if err!=nil	{
-		log.Fatal("(SubmitEat) Request failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(SubmitEat) Request failed: ",err)
+		}
+		if c.config.Info	{
+			log.Println("(SubmitEat) Request failed: ",err)
+		}
+		return bs,errors.New("(SubmitEat) http.Request failed")
 	}  
 	if c.config.Info	{
 		log.Println("(SubmitEat) Request returned : ",bs)
 	}
 	if len(bs.Bid)>0	{
 		b,h,a,lw,lp,w,p:=ParseBid(bs.Bid[0])
-		log.Println("(SubmitEat.ParseBid) : ",b,h,a,lw,lp,w,p)
+		if c.config.Info	{
+			log.Println("(SubmitEat.ParseBid) : ",b,h,a,lw,lp,w,p)
+		}
 		bs.Win=w
 		bs.Place=p
 		bs.BetId=b
@@ -505,7 +566,9 @@ func	(c	*Client)SubmitEat(racedate string,racetype string,race int,horse string,
 	}
 	if len(bs.Transacted)>0	{
 		ht,wt,pt:=ParseTransacted(bs.Transacted[0])
-		log.Println("(SubmitEat.ParseTransacted) : ",ht,wt,pt)
+		if c.config.Info	{
+			log.Println("(SubmitEat.ParseTransacted) : ",ht,wt,pt)
+		}
 	}
 	
 	return
@@ -520,19 +583,20 @@ func	ParseBid(bidstr string)	(bid int64,horse string,amount float64,lwin,lplace 
 	
 	bids := strings.Split(str, "_")
 	if len(bids)<7	{
-		log.Fatal("(ParseBid) Invalid string len : ",bids)
+		log.Println("(ParseBid) Invalid string len : ",bids)
+		return
 	}
-	log.Println("(ParseBid) Bids : ",bids)
+//	log.Println("(ParseBid) Bids : ",bids)
 	
-	bid,err:=strconv.ParseInt(bids[0],10,64)
-	log.Printf("(ParseBid) {%s} = %d : %v\n",bids[0],bid,err)
+	bid,_=strconv.ParseInt(bids[0],10,64)
+//	log.Printf("(ParseBid) {%s} = %d : %v\n",bids[0],bid,err)
 	horse=bids[1]
 	amount,_=strconv.ParseFloat(bids[2],64)
 	lwin,_=strconv.ParseFloat(bids[3],64)
 	lplace,_=strconv.ParseFloat(bids[4],64)
 	win,_=strconv.ParseFloat(bids[5],64)
 	place,_=strconv.ParseFloat(bids[6],64)
-	log.Println("(ParseBid) ",str," = ",bid,horse,amount,lwin,lplace,win,place)
+//	log.Println("(ParseBid) ",str," = ",bid,horse,amount,lwin,lplace,win,place)
 	return
 }
 
@@ -542,13 +606,14 @@ func ParseTransacted(str string)	(horse string,win,place float64)	{
 	}
 	trans:= strings.Split(str, "_")
 	if len(trans)<3	{
-		log.Fatal("(ParseTransacted) Invalid string len : ",trans)
+		log.Println("(ParseTransacted) Invalid string len : ",trans)
+		return
 	}
-	log.Println("(ParseTransacted) Trans: ",trans)
+//	log.Println("(ParseTransacted) Trans: ",trans)
 	horse=trans[0]
 	win,_=strconv.ParseFloat(trans[1],64)
 	place,_=strconv.ParseFloat(trans[2],64)
-	log.Printf("(ParseTransacted) %s = %s, %.2f, %.2f\n",str,horse,win,place)
+//	log.Printf("(ParseTransacted) %s = %s, %.2f, %.2f\n",str,horse,win,place)
 	return
 }
 	
@@ -586,18 +651,19 @@ func	(c	*Client)DeleteBet(racedate string,racetype string,race int,bid int64,bet
 	if c.config.Info	{
 		log.Printf("(DeleteBet) Url:%s\n",url)
 	}
-log.Printf("(DeleteBet) Url:%s\n",url)
-	if c.config.Debug	{
-		return	
-	}	
 	err=c.Request(url,&rs)
 	if err!=nil	{
-		log.Fatal("(DeleteBet) Request failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(DeleteBet) Request failed: ",err)
+		}
+		if c.config.Info	{
+			log.Println("(DeleteBet) Request failed: ",err)
+		}
+		return rs,errors.New("(DeleteBet) http.Request failed")
 	} 
 	if c.config.Info	{
 		log.Println("(DeleteBet) Request returned : ",rs)
 	}
-log.Println("(DeleteBet) Request returned : ",rs)
 	return
 }
 
@@ -639,12 +705,15 @@ func	(c	*Client)News(cardId	int)	(news	[]string,err error)	{
 	if c.config.Info	{
 		log.Printf("(News) Url:%s\n",url)
 	}
-	if c.config.Debug	{
-		return	
-	}	
 	err=c.Request(url,&newsJSON)
 	if err!=nil	{
-		log.Fatal("(News) Request failed: ",err)
+		if c.config.Debug	{
+			log.Fatal("(News) Request failed: ",err)
+		}
+		if c.config.Info	{
+			log.Println("(News) Request failed: ",err)
+		}
+		return news,errors.New("(News) http.Request failed")
 	}
 	if c.config.Info	{
 		log.Println("(News) Request returned : ",news)
