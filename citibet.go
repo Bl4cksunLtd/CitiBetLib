@@ -16,7 +16,7 @@ var		(
 )
 
 const	(
-	version	=	"1.1a"
+	version	=	"1.1b"
 )
 
 func	Version()		string	{
@@ -70,7 +70,7 @@ func	(c *Client)Request(url string, v interface{}) error {
 
 	if err != nil {
 		if c.config.Info	{
-			log.Println("(Request) Get failed: ",err," URL: ",url)
+			log.Println("(Request) Get failed: ",err)
 		}
 		return err
 	}
@@ -87,7 +87,6 @@ func	(c *Client)Request(url string, v interface{}) error {
 		if c.config.Info	{
 			log.Println("(Request) Returned Null: URL: ",url,data)
 		}
-		log.Println("(Request) Returned Null: URL: ",url,data)
 		return	nil		// returns no error -> empty structure
 	}
 	FixJSON(data,len(data)) // deal with leading zeros
@@ -98,9 +97,9 @@ func	(c *Client)Request(url string, v interface{}) error {
 		return errors.New(resp.Status)
 	} else {
 		if err := json.Unmarshal(data, v); err != nil {
-//			if c.config.Info	{
+			if c.config.Info	{
 				log.Println("(Request) Unmarshal failed: ",err," raw data: ",data)
-//			}
+			}
 			return err
 		}
 	}
