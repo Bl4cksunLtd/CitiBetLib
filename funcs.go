@@ -161,7 +161,7 @@ func	(c	*Client)BetPendingList(rd string,rt	string,r	int,cur 	int,inplay	bool)	(
 			log.Fatal("(BetPendingList) Get failed: ",err)
 		}
 		if c.config.Info	{
-			log.Fatal("(BetPendingList) Get failed: ",err)
+			log.Println("(BetPendingList) Get failed: ",err)
 		}
 		return bpl,errors.New("(BetPendingList) http.Request failed")
 	}
