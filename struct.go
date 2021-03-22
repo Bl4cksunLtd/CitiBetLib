@@ -7,7 +7,8 @@ import (
 )
 
 const	(
-	
+		// MAXRACES is used by EventList() to store a list of race statuses for a meeting
+		MAXRACES	=	100
 )
 
 type	CBfloat64	float64
