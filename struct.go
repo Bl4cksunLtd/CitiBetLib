@@ -45,9 +45,12 @@ type	CardListResponse	struct	{
 }
 
 type	Event	struct	{
+	RaceType		string		
 	RaceStatus		int			`json:",string"`
 	RaceTime		string
 	Race			int			`json:",string"`
+	Live 			int 		`json:",string"`
+	LiveSeconds		int			`json:",string"`
 }
 
 type	EventListResponse	struct	{
