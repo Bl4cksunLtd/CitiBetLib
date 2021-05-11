@@ -85,6 +85,8 @@ func	(c	*Client)CardList()	(clr	CardListResponse,err	error)	{
 
 func	(c	*Client)EventList(rd string,cId	int)	(elr	EventListResponse,err error)	{
 	var		status	[MAXRACES]int
+	var 	live	[MAXRACES]int
+	var 	ls 		[MAXRACES]int
 	url:=fmt.Sprintf("%sapi/service/raceinfoservlet?method=eventlist&raceDate=%s&cardId=%d",
 					c.config.Url,
 					rd,
@@ -113,6 +115,12 @@ func	(c	*Client)EventList(rd string,cId	int)	(elr	EventListResponse,err error)	{
 			if status[rn]!=3	{
 				status[rn]=event.RaceStatus
 			}
+			if live[rn]==0	{
+				live[rn]=event.Live
+			}
+			if ls[rn]==0	{
+				ls[rn]=event.LiveSeconds
+			}
 		}	else	{
 			//Race number exceeds MAXRACES
 			if c.config.Debug	{
@@ -126,6 +134,8 @@ func	(c	*Client)EventList(rd string,cId	int)	(elr	EventListResponse,err error)	{
 	for r,event:=range elr.EventList	{
 		if rn=event.Race;rn<MAXRACES	{
 			elr.EventList[r].RaceStatus=status[rn]
+			elr.EventList[r].Live=live[rn]
+			elr.EventList[r].LiveSeconds=ls[rn]
 		}
 	}
 	return
